@@ -9,22 +9,27 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
-# Unzip model files if not already extracted
-if not os.path.exists("travel_model.pkl") or not os.path.exists("model_columns.pkl"):
+# ---------- Load and Extract Model Files ----------
+model_dir = 'model_files'
+
+# Extract travel_model.pkl if not already extracted
+if not os.path.exists(os.path.join(model_dir, 'travel_model.pkl')):
     try:
-        with zipfile.ZipFile("models.zip", "r") as zip_ref:
-            zip_ref.extractall()
-            print("Model files extracted from models.zip")
+        with zipfile.ZipFile('travel_model.zip', 'r') as zip_ref:
+            zip_ref.extractall(model_dir)
+            print("Model extracted successfully.")
     except Exception as e:
-        print(f"ERROR: Could not extract model files. Error: {str(e)}")
+        print(f"ERROR: Could not extract model files. Error: {e}")
 
 # Load model and columns
 try:
+    travel_model = pickle.load(open(os.path.join(model_dir, "travel_model.pkl"), "rb"))
     model_columns = pickle.load(open("model_columns.pkl", "rb"))
-    travel_model = pickle.load(open("travel_model.pkl", "rb"))
+    print("Model and columns loaded successfully.")
 except Exception as e:
-    print(f"ERROR: Could not load model pipeline. Error: {str(e)}")
+    print(f"ERROR: Could not load model or columns. Error: {e}")
 
+# -------------------- ROUTES --------------------
 @app.route('/')
 def home():
     return render_template('welcome.html')
@@ -44,19 +49,11 @@ def recommendations():
 
     recommendations_list = []
 
-    def get_destination_for_package(package_type):
-        destinations = {
-            'Budget': ['Goa', 'Jaipur', 'Agra', 'Rishikesh', 'Varanasi'],
-            'Standard': ['Kerala', 'Himachal Pradesh', 'Udaipur', 'Darjeeling', 'Amritsar'],
-            'Premium': ['Andaman', 'Kashmir', 'Leh Ladakh', 'Sikkim', 'Coorg'],
-            'Luxury': ['Maldives', 'Thailand', 'Dubai', 'Singapore', 'Malaysia']
-        }
-        return random.choice(destinations.get(package_type, destinations['Standard']))
-
     for i in range(5):
         destination = get_destination_for_package(package_type)
         hotel_category = get_hotel_for_package(package_type)
         airline = get_airline_for_city(start_city)
+
         form_data = {
             'Start City': start_city,
             'Traveling Days': traveling_days,
@@ -98,7 +95,6 @@ def recommendations():
 @app.route('/details/<destination>')
 def details(destination):
     recommendations_list = session.get('recommendations_list', [])
-
     selected = next((item for item in recommendations_list if item['destination'] == destination), None)
 
     if selected:
@@ -107,7 +103,6 @@ def details(destination):
         selected['sightseeing'] = get_sightseeing(destination)
         selected['hotel_details'] = get_hotel_details(selected['hotel_category'])
         selected['cancellation_rules'] = 'Free cancellation up to 7 days before travel'
-
         return render_template('detailed_results.html', package=selected)
     else:
         return "Invalid selection", 404
@@ -214,23 +209,6 @@ def get_sightseeing(destination):
     else:
         return f"No sightseeing data available for {destination}"
 
-def calculate_default_price(package_type, start_city, traveling_days):
-    print(f"Calculating default price with package_type={package_type}, start_city={start_city}, traveling_days={traveling_days}")
-    base_prices = {'Budget': 12000, 'Standard': 18000, 'Premium': 25000, 'Luxury': 35000}
-    city_factors = {'Mumbai': 1.2, 'Delhi': 1.1, 'Bangalore': 1.0, 'Chennai': 0.9, 'Kolkata': 0.85}
-    base = base_prices.get(package_type, 15000)
-    city_factor = city_factors.get(start_city, 1.0)
-    days_factor = int(traveling_days) / 5
-    return base * city_factor * days_factor
-
-def get_per_person_price(start_city, destination, traveling_days):
-    matching_package = df[(df['Start City'] == start_city) &
-                          (df['Destination'] == destination) &
-                          (df['Traveling Days'] == traveling_days)]
-    if not matching_package.empty:
-        return matching_package['Per Person Price'].values[0]
-    else:
-        return None
-
+# ------------------ RUN ------------------
 if __name__ == "__main__":
     app.run(debug=True)
