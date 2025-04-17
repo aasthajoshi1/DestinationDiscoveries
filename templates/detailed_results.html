@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TravelSense Detailed Results</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f8fc;
+            margin: 0;
+            padding: 0;
+        }
+        .header-bg {
+            background: url('/static/background.avif') no-repeat center center fixed;
+            width: 100%;
+            height: 150px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Ensure it stays behind the content */
+            filter: blur(8px); /* Apply the blur to the background image */
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+            width: 100%;
+            position: relative; /* Keep the text on top */
+            z-index: 1; /* Ensure it stays above the blurred background */
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 18px;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h2 {
+            color: #2b6cb0;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 500;
+        }
+
+        .package-details {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #4B5563;
+        }
+
+        .package-details div {
+            margin-bottom: 15px;
+        }
+
+        .package-details ul {
+            padding-left: 20px;
+        }
+
+        .package-details li {
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            background-color: #3182ce;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #225ea8;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #6B7280;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Card Style */
+        .package-card {
+            border-radius: 15px;
+            padding: 25px;
+            background-color: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            margin-top: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .package-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .package-card .destination {
+            font-size: 28px;
+            font-weight: 600;
+            color: #4B5563;
+            border-bottom: 2px solid #6366F1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        .package-card .package-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .package-card .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .package-card .label {
+            font-size: 14px;
+            color: #6B7280;
+            margin-bottom: 6px;
+        }
+
+        .package-card .value {
+            font-size: 16px;
+            color: #1F2937;
+            font-weight: 500;
+        }
+
+        .package-card .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #4F46E5;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bg"></div>
+    <!-- Header -->
+    <div class="header">
+        <h1>Destination: {{ package.destination }}</h1>
+        <p>Your Personalized Travel Package</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Package Card -->
+        <div class="package-card">
+            <div class="destination">{{ package.destination }}</div>
+
+            <div class="package-info">
+                <div class="info-item">
+                    <span class="label">Start City</span>
+                    <span class="value">{{ package.start_city }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Package Type</span>
+                    <span class="value">{{ package.package_type }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Duration</span>
+                    <span class="value">{{ package.traveling_days }} Days</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Airline</span>
+                    <span class="value">{{ package.airline }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Hotel Category</span>
+                    <span class="value">{{ package.hotel_category }}</span>
+                </div>
+            </div>
+
+            <h2>Itinerary</h2>
+            <div class="package-details">
+                <ul>
+                    {% for day in package.itinerary %}
+                        <li>{{ day }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Add Sightseeing section here -->
+            <div class="package-details">
+                <h3>Sightseeing</h3>
+                <p>{{ package.sightseeing }}</p>
+            </div>
+
+            <div class="package-details">
+                <div><strong>Cancellation Rules:</strong> {{ package.cancellation_rules }}</div>
+                <div><strong>Price:</strong> ₹{{ package.price }}</div>
+            </div>
+
+            <a href="{{ url_for('prediction_form') }}" class="btn">Back to Recommendations</a>
+        </div>
+    </div>
+</body>
+</html>

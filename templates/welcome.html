@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to TravelSense</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative; /* To ensure the blur div stays behind */
+        }
+
+        .background-blur {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/background.avif') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(8px); /* Apply blur to the background */
+            z-index: -1; /* Ensure the blur stays behind the container */
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1; /* Ensure the container is above the blurred background */
+        }
+
+        .container img {
+            width: 120px; /* Adjust logo size */
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2b6cb0;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 18px;
+            color: #4a4a4a;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background-color: #3182ce;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #225ea8;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blur"></div> <!-- Apply the blur effect only to this div -->
+    <div class="container">
+        <img src="{{ url_for('static', filename='location-travel-logo.svg') }}" alt="TravelSense Logo">
+        <h1>Welcome to DestinationDiscoveries</h1>
+        <p>Your personal travel assistant.</p>
+        <a href="{{ url_for('prediction_form') }}" class="btn">Start Predicting</a>
+    </div>
+</body>
+</html>
