@@ -2,10 +2,21 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 import pickle
 import random
 import pandas as pd
+import zipfile
+import os
 
 # Initialize app
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
+
+# Unzip model files if not already extracted
+if not os.path.exists("travel_model.pkl") or not os.path.exists("model_columns.pkl"):
+    try:
+        with zipfile.ZipFile("models.zip", "r") as zip_ref:
+            zip_ref.extractall()
+            print("Model files extracted from models.zip")
+    except Exception as e:
+        print(f"ERROR: Could not extract model files. Error: {str(e)}")
 
 # Load model and columns
 try:
@@ -33,7 +44,6 @@ def recommendations():
 
     recommendations_list = []
 
-    # Get destination for package function
     def get_destination_for_package(package_type):
         destinations = {
             'Budget': ['Goa', 'Jaipur', 'Agra', 'Rishikesh', 'Varanasi'],
@@ -101,7 +111,6 @@ def details(destination):
         return render_template('detailed_results.html', package=selected)
     else:
         return "Invalid selection", 404
-
 
 # ------------------ Helper Functions ------------------
 
@@ -206,27 +215,22 @@ def get_sightseeing(destination):
         return f"No sightseeing data available for {destination}"
 
 def calculate_default_price(package_type, start_city, traveling_days):
-    print(f"Calculating default price with package_type={package_type}, start_city={start_city}, traveling_days={traveling_days}")  # Debugging line
+    print(f"Calculating default price with package_type={package_type}, start_city={start_city}, traveling_days={traveling_days}")
     base_prices = {'Budget': 12000, 'Standard': 18000, 'Premium': 25000, 'Luxury': 35000}
     city_factors = {'Mumbai': 1.2, 'Delhi': 1.1, 'Bangalore': 1.0, 'Chennai': 0.9, 'Kolkata': 0.85}
     base = base_prices.get(package_type, 15000)
     city_factor = city_factors.get(start_city, 1.0)
     days_factor = int(traveling_days) / 5
-    print(f"Calculated base: {base}, city_factor: {city_factor}, days_factor: {days_factor}")  # Debugging line
     return base * city_factor * days_factor
 
-# Get the Per Person Price from the dataset for the selected package
 def get_per_person_price(start_city, destination, traveling_days):
-    # Filter dataset to match the selected conditions
-    matching_package = df[(df['Start City'] == start_city) & 
-                          (df['Destination'] == destination) & 
+    matching_package = df[(df['Start City'] == start_city) &
+                          (df['Destination'] == destination) &
                           (df['Traveling Days'] == traveling_days)]
-    
     if not matching_package.empty:
-        return matching_package['Per Person Price'].values[0]  # Return the per person price
+        return matching_package['Per Person Price'].values[0]
     else:
-        return None  # If no matching data is found
-
+        return None
 
 if __name__ == "__main__":
     app.run(debug=True)
